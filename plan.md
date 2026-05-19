@@ -93,7 +93,7 @@ The browser has built-in tools for capturing mic input in real time. No library 
 Before writing a single line of code, create this folder layout. Every file below has a home here — even though it's a small project, this mirrors how real ML projects are organized at companies.
 
 ```
-voice-tracker/
+voice_detection/
 │
 ├── data/                        # Audio files used for testing
 │   ├── test.wav                 # Your recorded test clip (generated, not written)
@@ -121,7 +121,9 @@ voice-tracker/
 │   └── ui/                      # Display and interface
 │       └── terminal.py          # Step 7 — live terminal bar display
 │
+├── .env                         # Local variables
 ├── main.py                      # Entry point — ties everything together
+├── plan.md                      # Full plan
 ├── requirements.txt             # All pip dependencies listed here
 └── README.md                    # How to install and run the project
 ```
