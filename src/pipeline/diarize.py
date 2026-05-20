@@ -7,21 +7,25 @@ from pathlib import Path
 from dotenv import load_dotenv
 from pyannote.audio import Pipeline
 
-# Load .env from project root regardless of where Python is run from
+# Load .env from project root
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 # Load model
-pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", use_auth_token=os.environ["HF_TOKEN"])
+pipeline = Pipeline.from_pretrained(
+    "pyannote/speaker-diarization-3.1", # model name
+    use_auth_token=os.environ["HF_TOKEN"] # API
+)
 
 if pipeline is None:
     raise RuntimeError("Failed to load pyannote pipeline. Check your token and that you've accepted the model terms at hf.co/pyannote/speaker-diarization-3.1")
 
 def run_diarization(audio_source):
+    # str -> feed directly to model
     if isinstance(audio_source, str):
         diarization = pipeline(audio_source)
 
+    # np.ndarray -> convert to expected format and feed to model
     elif isinstance(audio_source, np.ndarray):
-        # Convert to the format pyannote expects
         tensor = torch.tensor(audio_source).float().unsqueeze(0)  # shape: (1, samples)
         audio_dict = {"waveform": tensor, "sample_rate": 16000}
         diarization = pipeline(audio_dict)

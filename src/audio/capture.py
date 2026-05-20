@@ -1,3 +1,5 @@
+# records entire audio first
+
 import sounddevice as sd
 import scipy.io.wavfile as wav
 

@@ -35,7 +35,7 @@ def start_stream(processor=None):
     thread = threading.Thread(
         target=wait_for_enter, # thread will run this function (not immediately)
         daemon=True # Daemon thread killed at program end
-    ) 
+    )
     thread.start() # runs wait_for_enter() in background
 
     # with allows automatic cleanup of audio stream on exit of block
