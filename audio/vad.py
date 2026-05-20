@@ -11,6 +11,23 @@ class VAD:
 
     def is_speech(self, frame_bytes, sample_rate=SAMPLE_RATE):
         return self.vad.is_speech(frame_bytes, sample_rate)
+
+    def label_frames(self, audio, sample_rate=SAMPLE_RATE, frame_ms=FRAME_MS):
+        frame_size = int(sample_rate * frame_ms / 1000)
+        labeled_frames = []
+
+        for i in range(0, len(audio), frame_size):
+            frame = audio[i:i+frame_size]
+
+            # skip incomplete frames
+            if len(frame) != frame_size:
+                continue
+
+            frame_bytes = frame.tobytes()
+            speech = self.is_speech(frame_bytes, sample_rate)
+            labeled_frames.append([frame, speech])
+
+        return labeled_frames
     
     def merge_frames(self, frames, # list of (frame, is_speech)
                      sample_rate = SAMPLE_RATE,
