@@ -1,0 +1,13 @@
+sounddevice
+numpy
+py-webrtcvad
+librosa
+speechbrain
+scikit-learn
+flask
+flask-sock
+torch
+torchaudio
+notebook
+matplotlib
+scipy
