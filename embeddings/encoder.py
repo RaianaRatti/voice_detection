@@ -17,7 +17,7 @@ class SpeakerEncoder:
         if audio_np.dtype != np.float32:
             audio_np = audio_np.astype(np.float32) / 32768.0 # [-1, 1]
         
-        tensor = torch.tensor(audio_np).unsqueeze(0) # N samples to [1, N]
+        tensor = torch.tensor(audio_np).unsqueeze(0) # N samples to [1, N] 
 
         with torch.no_grad(): # no record gradient (intermediate) values
             embedding = self.classifier.encode_batch(tensor)
