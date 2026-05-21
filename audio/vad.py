@@ -9,11 +9,12 @@ class VAD:
     def __init__(self, aggressiveness=VAD_AGGRESSIVENESS):
         self.vad = webrtcvad.Vad(aggressiveness)
 
+    # webrtc vad require frames to be passed as raw binary bytes (use .tobytes() to pass)
     def is_speech(self, frame_bytes, sample_rate=SAMPLE_RATE):
         return self.vad.is_speech(frame_bytes, sample_rate)
 
     def label_frames(self, audio, sample_rate=SAMPLE_RATE, frame_ms=FRAME_MS):
-        frame_size = int(sample_rate * frame_ms / 1000)
+        frame_size = int(sample_rate * frame_ms / 1000) # samples per frame (audio chunk)
         labeled_frames = []
 
         for i in range(0, len(audio), frame_size):
