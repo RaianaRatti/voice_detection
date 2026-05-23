@@ -91,8 +91,27 @@ body {
   color: var(--accent);
   cursor: pointer;
   transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-  margin-bottom: 2rem;
   display: block;
+}
+
+#reset-btn {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.7rem 1.5rem;
+  border: 1.5px solid var(--muted);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+#reset-btn:hover {
+  background: var(--muted);
+  color: #0d0f14;
 }
 
 #connect-btn:hover {

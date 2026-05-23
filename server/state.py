@@ -9,6 +9,7 @@ class SharedState:
             "current": None,
             "times": {} # dict of {speaker_id: float}
         }
+        self.pending_reset = False
 
     def update(self, speaker_id, times_dict):
         with self.lock:
@@ -16,6 +17,17 @@ class SharedState:
                 "current": speaker_id,
                 "times": times_dict
             }
+    def reset(self):
+        with self.lock:
+            self.state = {"current": None, "times": {}}
+            self.pending_reset = True
+    
+    def consume_reset(self):
+        with self.lock:
+            if self.pending_reset:
+                self.pending_reset = False
+                return True
+            return False
 
     def get(self):
         with self.lock:

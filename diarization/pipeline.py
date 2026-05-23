@@ -24,6 +24,11 @@ def run(state):
     was_speaking = False
 
     for frame in audio_capture():
+        if state.consume_reset():
+            tracker = SpeakerTracker()
+            current_frames = []
+            was_speaking = False
+            
         frame_bytes = frame.tobytes()
         is_speaking = vad.is_speech(frame_bytes, SAMPLE_RATE)
 
@@ -41,6 +46,6 @@ def run(state):
             speaker_id = tracker.update(embedding, duration_seconds)
 
             state.update(speaker_id, tracker.get_state()["times"]) # update state
+            current_frames = [] # clean buffer
 
-        current_frames = [] # clean buffer
         was_speaking = is_speaking

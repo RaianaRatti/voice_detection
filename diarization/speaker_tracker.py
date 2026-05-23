@@ -9,9 +9,9 @@ from diarization.clustering import assign_speaker
 
 class SpeakerTracker:
     def __init__(self):
-        history = [] # list of (emebdding, speaker_id)
-        speak_times = {} # dict of {speaker_id: float}
-        current_speaker = None # int or None
+        self.history = [] # list of (emebdding, speaker_id)
+        self.speak_times = {} # dict of {speaker_id: float}
+        self.current_speaker = None # int or None
     
     # calls clustering.assign_speaker() to update speak_times, history, current_speaker, and return speaker_id
     def update(self, embedding, duration_seconds) -> int:

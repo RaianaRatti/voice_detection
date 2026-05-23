@@ -36,6 +36,12 @@ def static_files(filename):
     return send_from_directory(STATIC_DIR, filename) # sends user to 'filename'
 
 
+@app.route("/reset", methods=["POST"])
+def reset():
+    state.reset()
+    return "", 204
+
+
 @sock.route("/ws") # user connects to /ws, below function executes indefinitely
 def websocket(ws): 
     while True:

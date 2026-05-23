@@ -1,3 +1,4 @@
+const resetButton = document.getElementById("reset-btn");
 const connectButton = document.getElementById("connect-btn");
 const speakersDiv   = document.getElementById("speakers");
 const statusDot     = document.getElementById("status-dot");
@@ -147,4 +148,9 @@ connectButton.addEventListener("click", () => {
   } else {
     connect();
   }
+});
+
+resetButton.addEventListener("click", () => {
+  speakersDiv.innerHTML = "";
+  fetch("/reset", { method: "POST" });
 });
