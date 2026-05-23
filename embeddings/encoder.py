@@ -20,6 +20,6 @@ class SpeakerEncoder:
         tensor = torch.tensor(audio_np).unsqueeze(0) # N samples to [1, N] 
 
         with torch.no_grad(): # no record gradient (intermediate) values
-            embedding = self.classifier.encode_batch(tensor)
+            embedding = self.classifier.encode_batch(tensor) # 192-dimensional embedding
         
         return embedding.squeeze().cpu().numpy()
