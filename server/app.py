@@ -4,10 +4,13 @@
 #   3. JavaScript connects client to Websocket requests --> URL becomes /ws... (like /http...)
 
 from pathlib import Path
+import sys
 
-FRONTEND_DIR = Path(__file__).resolve().parents[1] / "frontend"
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.append(str(ROOT))
+STATIC_DIR = Path(__file__).resolve().parent / "static"
 
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, render_template
 from flask_sock import Sock
 import json
 import threading
@@ -25,12 +28,12 @@ state = SharedState()
 
 @app.route("/") # Flask automatically executes function following this and returns output to user's browser
 def index():
-    return send_from_directory(FRONTEND_DIR, "index.html") # sends user to "index.html"
+    return render_template("index.html") # sends user to "index.html"
 
 
 @app.route("/static/<path:filename>") # catch-all (if user visits "/static/css/main.css", filename = "css/main.css")
 def static_files(filename):
-    return send_from_directory(FRONTEND_DIR, filename) # sends user to 'filename'
+    return send_from_directory(STATIC_DIR, filename) # sends user to 'filename'
 
 
 @sock.route("/ws") # user connects to /ws, below function executes indefinitely
@@ -60,6 +63,7 @@ if __name__ == "__main__":
     # start Flask server - ONLY USE ON HOME NETWORK
     app.run(
         host="0.0.0.0", # allows other devices on your network connection to user your website
-        port=5000,
-        debug=True # auto reload when new save + error line shows when error achieved
+        port=5050,
+        debug=True, # auto reload when new save + error line shows when error achieved
+        use_reloader=False
     )

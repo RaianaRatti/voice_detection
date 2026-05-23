@@ -66,7 +66,6 @@ diarization/
 ├── embeddings/
 ├── diarization/
 ├── server/
-├── frontend/
 ├── models/
 ├── notebooks/
 └── tests/

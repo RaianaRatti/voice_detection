@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Speaker Diarization</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <div class="header">
+    <div class="title-block">
+      <h1>Speaker Diarization</h1>
+      <p>Real-time talk-time tracking</p>
+    </div>
+    <div class="status-bar">
+      <div class="status-dot" id="status-dot"></div>
+      <span id="status-text">Disconnected</span>
+    </div>
+  </div>
+
+  <button id="connect-btn">Connect</button>
+
+  <div id="speakers"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
