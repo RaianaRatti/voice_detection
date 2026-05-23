@@ -17,10 +17,11 @@ let socket = null;
 let running = false;
 
 function formatTime(seconds) {
-  const s = Math.floor(seconds);
+  const ms   = Math.floor((seconds % 1) * 10); // tenths of a second
+  const s    = Math.floor(seconds);
   const mins = Math.floor(s / 60);
   const secs = s % 60;
-  return String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
+  return String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0") + "." + ms;
 }
 
 function getOrCreateCard(speakerId) {
@@ -28,9 +29,13 @@ function getOrCreateCard(speakerId) {
   let card = document.getElementById(domId);
 
   if (!card) {
-    const idx   = Number(speakerId) % SPEAKER_COLORS.length;
-    const color = SPEAKER_COLORS[idx];
-    const num   = Number(speakerId) + 1; // 1-indexed label
+    const isSilent = speakerId === "silent";
+    const idx      = isSilent ? 0 : Number(speakerId) % SPEAKER_COLORS.length;
+    const color    = isSilent
+      ? { border: "#6b7280", glow: "rgba(107,114,128,0.3)" }
+      : SPEAKER_COLORS[idx];
+    const avatar   = isSilent ? "—" : Number(speakerId) + 1;
+    const label    = isSilent ? "Silent" : `Speaker ${Number(speakerId) + 1}`;
 
     card = document.createElement("div");
     card.className = "speaker-card";
@@ -39,9 +44,9 @@ function getOrCreateCard(speakerId) {
     card.style.setProperty("--speaker-glow",  color.glow);
 
     card.innerHTML = `
-      <div class="speaker-avatar">${num}</div>
+      <div class="speaker-avatar">${avatar}</div>
       <div class="speaker-info">
-        <div class="speaker-label">Speaker ${num}</div>
+        <div class="speaker-label">${label}</div>
         <div class="speaker-time">00:00</div>
         <div class="speaker-bar-track"><div class="speaker-bar"></div></div>
       </div>
@@ -64,22 +69,27 @@ function getOrCreateCard(speakerId) {
 }
 
 function applyState(data) {
-  // data = { current: <int|null>, times: { "0": <float>, "1": <float>, … } }
   const current = data.current;
   const times   = data.times || {};
+  const silence = data.silence ?? 0;
 
-  const totalTime = Object.values(times).reduce((a, b) => a + b, 0) || 1;
+  const allTimes = { ...times, silent: silence };
+  const totalTime = Object.values(allTimes).reduce((a, b) => a + b, 0) || 1;
 
-  for (const speakerId in times) {
-    const card    = getOrCreateCard(speakerId);
-    const timeEl  = card.querySelector(".speaker-time");
-    const barEl   = card.querySelector(".speaker-bar");
-    const pct     = Math.round((times[speakerId] / totalTime) * 100);
+  for (const speakerId in allTimes) {
+    if (allTimes[speakerId] <= 0 && speakerId !== "silent") continue;
+    const card   = getOrCreateCard(speakerId);
+    const timeEl = card.querySelector(".speaker-time");
+    const barEl  = card.querySelector(".speaker-bar");
+    const pct    = Math.round((allTimes[speakerId] / totalTime) * 100);
 
-    timeEl.textContent = formatTime(times[speakerId]);
+    timeEl.textContent = formatTime(allTimes[speakerId]);
     barEl.style.width  = pct + "%";
 
-    const isActive = (Number(speakerId) === Number(current));
+    const isActive = speakerId === "silent"
+      ? (current === null || current === undefined)
+      : (Number(speakerId) === Number(current));
+
     card.classList.toggle("active", isActive);
   }
 }

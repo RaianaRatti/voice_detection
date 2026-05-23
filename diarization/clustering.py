@@ -7,21 +7,31 @@ def assign_speaker(new_embedding, history) -> int: # history = [(embedding, spea
     if (not history):
         return 0
 
+    # group emebddings by speaker and compute per-speaker centroid
+    speaker_embeddings = {}
+    for embedding, speaker_id in history:
+        if speaker_id not in speaker_embeddings:
+            speaker_embeddings[speaker_id] = []
+        speaker_embeddings[speaker_id].append(embedding)
+
+    centroids = {
+        speaker_id: np.mean(np.stack(embeddings), axis=0)
+        for speaker_id, embeddings in speaker_embeddings.items()
+    }
+
     # compute cosine distance between new_embedding and each row
     best_distance = None
     best_id = None
 
-    for current_embedding, current_id in history:
-        distance = cosine(current_embedding, new_embedding)
-
-        if (best_distance is None or distance < best_distance):
+    for speaker_id, centroid in centroids.items():
+        distance = cosine(centroid, new_embedding)
+        if best_distance is None or distance < best_distance:
             best_distance = distance
-            best_id = current_id
-    
-    if (best_distance <= CLUSTER_THRESHOLD):
+            best_id = speaker_id
+
+    if best_distance <= CLUSTER_THRESHOLD:
         return best_id
-    
-    # new speaker
-    existing_ids = [speaker_id for _, speaker_id in history]
+
+    existing_ids = list(speaker_embeddings.keys())
     return max(existing_ids) + 1
     

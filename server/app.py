@@ -42,17 +42,18 @@ def reset():
     return "", 204
 
 
-@sock.route("/ws") # user connects to /ws, below function executes indefinitely
-def websocket(ws): 
-    while True:
-        try:
+@sock.route("/ws")
+def websocket(ws):
+    state.start()
+    try:
+        while True:
             current_state = state.get()
             ws.send(json.dumps(current_state))
             time.sleep(0.5)
-
-        except Exception:
-            print("WebSocket disconnected")
-            break
+    except Exception:
+        print("WebSocket disconnected")
+    finally:
+        state.stop()
 
 
 if __name__ == "__main__":

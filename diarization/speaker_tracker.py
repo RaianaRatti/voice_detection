@@ -1,6 +1,6 @@
 from pathlib import Path
 import sys
-from config import HISTORY_WINDOW
+from config import HISTORY_WINDOW, NEW_SPEAKER_TIME
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT))
@@ -17,11 +17,11 @@ class SpeakerTracker:
     def update(self, embedding, duration_seconds) -> int:
         speaker_id = assign_speaker(embedding, self.history)
 
-        if (speaker_id not in self.speak_times):
-            self.speak_times[speaker_id] = 0.0
-        
         # update
-        self.speak_times[speaker_id] += duration_seconds
+        if (speaker_id not in self.speak_times):
+            self.speak_times[speaker_id] = duration_seconds
+        else:
+            self.speak_times[speaker_id] += duration_seconds
         self.history.append((embedding, speaker_id))
         self.current_speaker = speaker_id
 
