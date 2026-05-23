@@ -36,6 +36,8 @@ class SpeakerTracker:
         return {
             "current": self.current_speaker,
             "times": {
-                str(speaker_id): duration for speaker_id, duration in self.speak_times.items()
+                # builds dictionary with (key, value) = (str(speaker_id), duration)
+                str(speaker_id): duration 
+                for speaker_id, duration in self.speak_times.items()
             }
         }
