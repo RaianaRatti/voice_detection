@@ -7,7 +7,6 @@ sys.path.append(str(ROOT))
 # -------------------------------------------
 
 import numpy as np
-import threading
 
 from audio.vad import VAD
 from embeddings.encoder import SpeakerEncoder
@@ -45,4 +44,3 @@ def run(state):
 
         current_frames = [] # clean buffer
         was_speaking = is_speaking
-
