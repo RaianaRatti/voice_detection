@@ -18,7 +18,10 @@ class SpeakerTracker:
         speaker_id = assign_speaker(embedding, self.history)
 
         # update
-        if (speaker_id not in self.speak_times):
+        if speaker_id not in self.speak_times:
+            if duration_seconds <= NEW_SPEAKER_TIME:
+                # don't register this speaker at all, don't update history or current
+                return None
             self.speak_times[speaker_id] = duration_seconds
         else:
             self.speak_times[speaker_id] += duration_seconds
