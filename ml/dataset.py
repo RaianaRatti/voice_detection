@@ -14,8 +14,8 @@ LABEL_MAP = {"silence": 0, "speech": 1, "overlap": 2, "vocalization": 3}
 # Extract MFCC + delta + delta-delta + energy from one 30ms frame
 # Converts raw audio into numerical features
 def extract_features(frame: np.ndarray, sr: int = SAMPLE_RATE) -> np.ndarray:
-    if frame.dtype != np.float32: # frame.dtype == np.int16
-        frame = frame.astype(np.float32) / 32768.0
+    if frame.dtype != np.float32:
+        frame = frame.astype(np.float32) / 32768.0 # [-1.0, 1,0]
 
     mfcc = librosa.feature.mfcc(y=frame, sr=sr, n_mfcc=N_MFCC)
     delta = librosa.feature.delta(mfcc)
@@ -40,7 +40,9 @@ class VADDataset(Dataset):
         self.samples   = []
         self._load()
 
+    # populates samples
     def _load(self):
+        # group all rows with same entry under "filename" (group all frames part of same file) and iterate through them
         for filename, group in self.df.groupby("filename"):
             audio_path = self.audio_dir / filename
             audio, _   = librosa.load(audio_path, sr=SAMPLE_RATE, mono=True)
@@ -55,6 +57,7 @@ class VADDataset(Dataset):
                 label = LABEL_MAP[row["label"]]
                 self.samples.append((frame, label))
 
+    # adds some random noise / volume to frame (label stays same)
     def _augment(self, frame: np.ndarray) -> np.ndarray:
         if np.random.rand() < 0.5:
             noise = np.random.randn(len(frame)).astype(np.float32) * 0.005 * 32768
@@ -67,6 +70,7 @@ class VADDataset(Dataset):
     def __len__(self):
         return len(self.samples)
 
+    # returns features + label given an index (part of the audio you want to work with)
     def __getitem__(self, idx):
         frame, label = self.samples[idx]
         if self.augment:
