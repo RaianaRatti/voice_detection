@@ -8,11 +8,11 @@ from ml.model import VADNet
 
 LABEL_CSV  = "train_data/labels/all_labels.csv"
 AUDIO_DIR  = "train_data/audio"
-MODEL_OUT  = "models/custom_vad.pt"
+MODEL_OUT  = "models/custom_vad.pt" # where to save trained model
 EPOCHS     = 30
-BATCH_SIZE = 256
-LR         = 1e-3
-VAL_SPLIT  = 0.15
+BATCH_SIZE = 256 # groups examples (256 given to model at same time)
+LR         = 1e-3 # Learning rate = 0.001, controls how large weight updates are
+VAL_SPLIT  = 0.15 # 15% of data is validation data
 
 
 def train():
@@ -27,10 +27,10 @@ def train():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Training on {device}")
 
-    model  = VADNet().to(device)
+    model  = VADNet().to(device) # creates nn (moves to CPU or GPU)
 
-    # vocalization and overlap are rarer — upweight them
-    weights   = torch.tensor([0.5, 1.0, 2.0, 2.0]).to(device)
+    # vocalization and overlap are rarer so upweighting them
+    weights = torch.tensor([0.5, 1.0, 2.0, 2.0]).to(device)
     criterion = nn.CrossEntropyLoss(weight=weights)
     optimizer = torch.optim.Adam(model.parameters(), lr=LR)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=3, factor=0.5)
@@ -76,3 +76,15 @@ def train():
 
 if __name__ == "__main__":
     train()
+
+'''
+Notes:
+    1. DataLoader --> handles batching, loading, shuffling
+        i. We keep shuffle = True so model does not learn falsely on order
+        ii. We batch 256 examples at a time (faster)
+        iii. We use 4 workers at a time (faster)
+    
+    2. Prefetching --> Before training, PyTorch must read audio, extract_features, convert to tensors, build batches. CPU would be sitting idle while this is being done if num_workers = 0 
+
+    3. Batch Size --> larger batch size with same amount of samples means less chance for model to adjust its weights
+'''

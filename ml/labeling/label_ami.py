@@ -115,7 +115,7 @@ def label_meeting(meeting_id: str) -> list[dict]:
 
     # --- assign label per frame ---
     rows = []
-    filename = f"{meeting_id}.Headset-0.wav"
+    filename = f"ami/amicorpus/{meeting_id}/audio/{meeting_id}.Headset-0.wav"
 
     for i in range(total_frames):
         start_ms = i * FRAME_MS

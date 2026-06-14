@@ -17,9 +17,9 @@ def extract_features(frame: np.ndarray, sr: int = SAMPLE_RATE) -> np.ndarray:
     if frame.dtype != np.float32:
         frame = frame.astype(np.float32) / 32768.0 # [-1.0, 1,0]
 
-    mfcc = librosa.feature.mfcc(y=frame, sr=sr, n_mfcc=N_MFCC)
-    delta = librosa.feature.delta(mfcc)
-    delta2 = librosa.feature.delta(mfcc, order=2)
+    mfcc = librosa.feature.mfcc(y=frame, sr=sr, n_mfcc=N_MFCC, n_fft=480, hop_length=160)
+    delta = librosa.feature.delta(mfcc, mode="nearest")
+    delta2 = librosa.feature.delta(mfcc, order=2, mode="nearest")
     energy = np.array([[np.log(np.sum(frame ** 2) + 1e-8)]])
 
     features = np.concatenate([

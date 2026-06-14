@@ -59,7 +59,7 @@ def run():
             start_ms = i * FRAME_MS
             end_ms   = start_ms + FRAME_MS
             rows.append({
-                "filename": row["filename"],
+                "filename": f"ESC-50-master/audio/{row['filename']}",
                 "start_ms": start_ms,
                 "end_ms":   end_ms,
                 "label":    label

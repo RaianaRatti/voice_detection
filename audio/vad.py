@@ -1,63 +1,50 @@
-# Labels each audio frame as speech or silence
-
-import webrtcvad
 import numpy as np
+import torch
+from pathlib import Path
 
-from config import SAMPLE_RATE, FRAME_MS, MIN_SPEECH_MS, VAD_AGGRESSIVENESS
+from ml.model import VADNet
+from ml.dataset import extract_features
+from config import SAMPLE_RATE, CUSTOM_VAD_MODEL_PATH, VAD_AGGRESSIVENESS
+
+SILENCE_CLASS      = 0
+SPEECH_CLASS       = 1
+OVERLAP_CLASS      = 2
+VOCALIZATION_CLASS = 3
+ACTIVE_CLASSES     = {SPEECH_CLASS, OVERLAP_CLASS, VOCALIZATION_CLASS}
+
 
 class VAD:
-    def __init__(self, aggressiveness=VAD_AGGRESSIVENESS):
-        self.vad = webrtcvad.Vad(aggressiveness)
+    def __init__(self):
+        model_path = Path(CUSTOM_VAD_MODEL_PATH)
+        if model_path.exists():
+            self._use_fallback = False
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            self.model  = VADNet().to(self.device)
+            self.model.load_state_dict(torch.load(CUSTOM_VAD_MODEL_PATH, map_location=self.device))
+            self.model.eval()
+            print("VAD: using custom neural model")
+        else:
+            self._use_fallback = True
+            import webrtcvad
+            self._fallback = webrtcvad.Vad(VAD_AGGRESSIVENESS)
+            print("VAD: custom_vad.pt not found, falling back to webrtcvad")
 
-    # webrtc vad require frames to be passed as raw binary bytes (use .tobytes() to pass)
-    def is_speech(self, frame_bytes, sample_rate=SAMPLE_RATE):
-        return self.vad.is_speech(frame_bytes, sample_rate)
+    def _predict(self, frame: np.ndarray) -> int:
+        features = extract_features(frame)
+        tensor   = torch.tensor(features).unsqueeze(0).to(self.device)
+        with torch.no_grad():
+            logits = self.model(tensor)
+        return logits.argmax(dim=1).item()
 
-    def label_frames(self, audio, sample_rate=SAMPLE_RATE, frame_ms=FRAME_MS):
-        frame_size = int(sample_rate * frame_ms / 1000) # samples per frame (audio chunk)
-        labeled_frames = []
+    def is_speech(self, frame_bytes: bytes, sample_rate: int = SAMPLE_RATE) -> bool:
+        if self._use_fallback:
+            return self._fallback.is_speech(frame_bytes, sample_rate)
+        frame = np.frombuffer(frame_bytes, dtype=np.int16)
+        return self._predict(frame) in ACTIVE_CLASSES
 
-        for i in range(0, len(audio), frame_size):
-            frame = audio[i:i+frame_size]
-
-            # skip incomplete frames
-            if len(frame) != frame_size:
-                continue
-
-            frame_bytes = frame.tobytes()
-            speech = self.is_speech(frame_bytes, sample_rate)
-            labeled_frames.append([frame, speech])
-
-        return labeled_frames
-    
-    def merge_frames(self, frames, # list of (frame, is_speech)
-                     sample_rate = SAMPLE_RATE,
-                     frame_ms = FRAME_MS,
-                     min_speech_ms = MIN_SPEECH_MS
-                     ):
-        
-        utterances = []
-        current_speech = []
-
-        for frame, is_speech in frames:
-            if is_speech:
-                current_speech.append(frame)
-            else:
-                if current_speech:
-                    utterance = np.concatenate(current_speech)
-                    duration_ms = (len(utterance) / sample_rate) * 1000
-                    
-                    if duration_ms >= min_speech_ms:
-                        utterances.append(utterance)
-                    
-                    current_speech = []
-        
-        # handling trailing speech
-        if current_speech:
-            utterance = np.concatenate(current_speech)
-            duration_ms = (len(utterance) / sample_rate) * 1000
-            
-            if duration_ms >= min_speech_ms:
-                utterances.append(utterance)
-        
-        return utterances
+    def get_class(self, frame_bytes: bytes, sample_rate: int = SAMPLE_RATE) -> int:
+        """Returns raw class int: 0=silence, 1=speech, 2=overlap, 3=vocalization."""
+        if self._use_fallback:
+            return 1 if self._fallback.is_speech(frame_bytes, sample_rate) else 0
+        frame = np.frombuffer(frame_bytes, dtype=np.int16)
+        return self._predict(frame)

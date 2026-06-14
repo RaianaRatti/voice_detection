@@ -36,7 +36,7 @@ def label_file(wav_path: Path) -> list[dict]:
         label = "speech" if is_speech else "silence"
 
         rows.append({
-            "filename": wav_path.name,
+            "filename": f"librispeech_flat/{wav_path.name}",
             "start_ms": int(i / SAMPLE_RATE * 1000),
             "end_ms":   int((i + FRAME_SIZE) / SAMPLE_RATE * 1000),
             "label":    label
