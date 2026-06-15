@@ -10,7 +10,7 @@ class SharedState:
             "times": {}, # dict of {speaker_id: float}
             "silence": 0.0
         }
-        self.pending_reset = False,
+        self.pending_reset = False
         self.running = False
 
     def update(self, speaker_id, times_dict, silence_seconds=0.0):

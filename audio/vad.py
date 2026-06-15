@@ -48,3 +48,13 @@ class VAD:
             return 1 if self._fallback.is_speech(frame_bytes, sample_rate) else 0
         frame = np.frombuffer(frame_bytes, dtype=np.int16)
         return self._predict(frame)
+    
+    # temporary
+    def _predict(self, frame: np.ndarray) -> int:
+        features = extract_features(frame)
+        tensor = torch.tensor(features).unsqueeze(0).to(self.device)
+        with torch.no_grad():
+            logits = self.model(tensor)
+        pred = logits.argmax(dim=1).item()
+        print(f"DEBUG VAD: {['silence','speech','overlap','vocalization'][pred]}")
+        return pred

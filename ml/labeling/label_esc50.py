@@ -37,10 +37,13 @@ def extract_frames(wav_path: Path) -> list[np.ndarray]:
 
 
 def run():
+    max_clips = 50
     df_meta = pd.read_csv(ESC50_CSV)
 
     # only keeps categories we care about 
     df_meta = df_meta[df_meta["category"].isin(CATEGORY_MAP.keys())]
+    df_meta = df_meta.head(max_clips)
+    
     print(f"Found {len(df_meta)} clips across categories: {df_meta['category'].value_counts().to_dict()}")
 
     rows = []

@@ -163,17 +163,21 @@ def run():
     print("\nRaw label counts:")
     print(df["label"].value_counts()) # values of each label category, prints them as dict
 
-    # balance: overlap and vocalization are rare so don't downsample them
-    # only cap silence and speech to 3x the overlap count
-    overlap_count = (df["label"] == "overlap").sum()
-    cap = max(overlap_count * 3, 10000)  # at least 10k per class
+    # per-label caps — silence/speech are rare in AMI so keep small;
+    # overlap dominates (100k+) so cap it to keep total AMI ~34k
+    LABEL_CAPS = {
+        "silence": 2_000,
+        "speech":  2_000,
+        "overlap": 25_000,
+        # vocalization: no cap (~5k available, keep all)
+    }
 
     balanced_parts = []
 
     for label in ["silence", "speech", "overlap", "vocalization"]:
-        subset = df[df["label"] == label] # only gets rows where label is current label
-        if len(subset) > cap and label in ("silence", "speech"):
-            subset = subset.sample(n=cap, random_state=42)
+        subset = df[df["label"] == label]
+        if label in LABEL_CAPS and len(subset) > LABEL_CAPS[label]:
+            subset = subset.sample(n=LABEL_CAPS[label], random_state=42)
         balanced_parts.append(subset)
 
     df_balanced = pd.concat(balanced_parts).sample(frac=1, random_state=42)

@@ -48,7 +48,7 @@ def label_file(wav_path: Path) -> list[dict]:
 def run():
     # only process ~2 hours
     wav_files = list(Path(LIBRISPEECH_DIR).rglob("*.flac"))
-    wav_files = wav_files[:200]
+    wav_files = wav_files[:15]
 
     # copy flac files flat into a single folder so dataset.py can find them
     flat_dir = Path("train_data/audio/librispeech_flat")
