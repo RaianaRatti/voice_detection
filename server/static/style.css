@@ -253,3 +253,22 @@ body {
   opacity: 1;
   transform: scale(1);
 }
+
+@keyframes speaker-pulse {
+  0%   { border-color: var(--border); box-shadow: none; transform: translateY(0); }
+  30%  { border-color: var(--speaker-color); box-shadow: 0 0 0 1px var(--speaker-color), 0 4px 28px var(--speaker-glow); transform: translateY(-2px); }
+  100% { border-color: var(--border); box-shadow: none; transform: translateY(0); }
+}
+
+@keyframes speaker-time-pulse {
+  0%, 100% { color: var(--text); }
+  30%      { color: var(--speaker-color); }
+}
+
+.speaker-card.pulse {
+  animation: speaker-pulse 0.25s ease-out forwards;
+}
+
+.speaker-card.pulse .speaker-time {
+  animation: speaker-time-pulse 0.25s ease-out forwards;
+}
