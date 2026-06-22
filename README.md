@@ -1,10 +1,12 @@
-# voice_detection
+# Live Speaker Detection
 
 Real-time speaker diarization in the browser. Listens to your microphone,
 segments the audio stream into speech utterances, and tracks how long each
 speaker has been talking — all running locally with sub-second latency.
 
----
+## Demo Video
+
+https://github.com/user-attachments/assets/45b5a95d-9ed2-40a5-ab77-9f2942420f73
 
 ## How it works
 
@@ -75,10 +77,10 @@ All tunable constants are in `config.py`:
 |---|---|---|
 | `SAMPLE_RATE` | `16000` | Microphone sample rate (Hz) |
 | `FRAME_MS` | `30` | VAD frame duration (ms) |
-| `MIN_SPEECH_MS` | — | Minimum utterance length; shorter frames are discarded |
+| `MIN_SPEECH_MS` | `300` | Minimum utterance length; shorter frames are discarded |
 | `CLUSTER_THRESHOLD` | `0.85` | Cosine similarity threshold for same-speaker matching |
 | `HISTORY_WINDOW` | `100` | Max embeddings kept per speaker for centroid computation |
-| `NEW_SPEAKER_TIME` | — | Seconds a new speaker must speak before being registered |
+| `NEW_SPEAKER_TIME` | `1.0` | Seconds a new speaker must speak before being registered |
 
 Raising `CLUSTER_THRESHOLD` toward `1.0` makes the system more aggressive about
 creating new speakers. Lowering it merges more utterances into existing speakers.
