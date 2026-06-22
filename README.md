@@ -98,6 +98,7 @@ voice_detection/
 │   └── speaker_tracker.py  # Per-speaker history and speak-time accumulation
 ├── embeddings/
 │   └── encoder.py          # ECAPA-TDNN via SpeechBrain
+├── visualizations/         # Visualizations for audio, vad, mfcc, embedding, clustering
 ├── server/
 │   ├── app.py              # Flask + WebSocket server, /reset endpoint
 │   |── state.py            # Thread-safe SharedState
