@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import numpy as np
 import torch
 from pathlib import Path
@@ -11,10 +12,16 @@ SPEECH_CLASS       = 1
 OVERLAP_CLASS      = 2
 VOCALIZATION_CLASS = 3
 ACTIVE_CLASSES     = {SPEECH_CLASS, OVERLAP_CLASS, VOCALIZATION_CLASS}
+=======
+import webrtcvad
+
+from config import SAMPLE_RATE, VAD_AGGRESSIVENESS
+>>>>>>> 734da48 (Fix done)
 
 
 class VAD:
     def __init__(self):
+<<<<<<< HEAD
         model_path = Path(CUSTOM_VAD_MODEL_PATH)
         if model_path.exists():
             self._use_fallback = False
@@ -58,3 +65,9 @@ class VAD:
         pred = logits.argmax(dim=1).item()
         print(f"DEBUG VAD: {['silence','speech','overlap','vocalization'][pred]}")
         return pred
+=======
+        self._webrtcvad = webrtcvad.Vad(VAD_AGGRESSIVENESS)
+
+    def is_speech(self, frame_bytes: bytes, sample_rate: int = SAMPLE_RATE) -> bool:
+        return self._webrtcvad.is_speech(frame_bytes, sample_rate)
+>>>>>>> 734da48 (Fix done)

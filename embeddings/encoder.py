@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from speechbrain.pretrained import EncoderClassifier
+from speechbrain.pretrained  import EncoderClassifier
 
 from config import SAMPLE_RATE
 

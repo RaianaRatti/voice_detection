@@ -58,7 +58,7 @@ def run(state):
                 current_frames = []
 
         state.update(
-            tracker.current_speaker,
+            tracker.current_speaker if is_speaking else None,
             tracker.get_state()["times"],
             total_silence_seconds
         )
