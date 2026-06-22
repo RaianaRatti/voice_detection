@@ -1,9 +1,10 @@
 .venv/
 __pycache__/
 
-train_data/
-test_data/
-docs/
 .env
+<<<<<<< HEAD
 preprocessed_features/
 models/
+=======
+models/
+>>>>>>> a32cdbc (Docs added)
