@@ -15,7 +15,6 @@ const SPEAKER_COLORS = [
 
 let socket = null;
 let running = false;
-let previousTimes = null; // null = no state received yet this session
 
 function formatTime(seconds) {
   const ms   = Math.floor((seconds % 1) * 10); // tenths of a second
@@ -69,30 +68,11 @@ function getOrCreateCard(speakerId) {
   return card;
 }
 
-function triggerPulse(speakerId) {
-  const card = document.getElementById(`speaker-${speakerId}`);
-  if (!card) return;
-  card.classList.remove("pulse");
-  void card.offsetWidth; // force reflow to restart animation
-  card.classList.add("pulse");
-  setTimeout(() => card.classList.remove("pulse"), 280);
-}
-
 function applyState(data) {
   const current = data.current ?? null;
   const times   = data.times || {};
   const silence = data.silence ?? 0;
   const nowSilent = current === null;
-
-  // When silence arrives, pulse whichever speaker(s) actually gained time this update
-  if (nowSilent && previousTimes !== null) {
-    for (const speakerId in times) {
-      if (times[speakerId] > (previousTimes[speakerId] ?? 0)) {
-        triggerPulse(speakerId);
-      }
-    }
-  }
-  previousTimes = { ...times };
 
   const allTimes = { ...times, silent: silence };
   const totalTime = Object.values(allTimes).reduce((a, b) => a + b, 0) || 1;
@@ -133,8 +113,7 @@ function disconnect(reason) {
   setStatus("disconnected");
 
   // de-activate all cards but leave times visible
-  document.querySelectorAll(".speaker-card").forEach(c => c.classList.remove("active", "pulse"));
-  previousTimes = null;
+  document.querySelectorAll(".speaker-card").forEach(c => c.classList.remove("active"));
 
   if (reason) console.warn("WebSocket closed:", reason);
 }

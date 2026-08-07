@@ -13,15 +13,17 @@ from audio.vad import VAD
 from embeddings.encoder import SpeakerEncoder
 from diarization.speaker_tracker import SpeakerTracker
 from audio.capture import audio_capture
-from config import SAMPLE_RATE, FRAME_MS, MIN_SPEECH_MS
+from config import SAMPLE_RATE, FRAME_MS, MIN_SPEECH_MS, SPEECH_HANGOVER_MS
 
 def run(state):
     vad = VAD()
     encoder = SpeakerEncoder()
     tracker = SpeakerTracker()
 
+    hangover_frames = int(SPEECH_HANGOVER_MS / FRAME_MS)
+
     current_frames = []
-    was_speaking = False
+    silence_run = 0          # consecutive non-speech frames since last real speech
     total_silence_seconds = 0.0
 
     for frame in audio_capture():
@@ -33,7 +35,7 @@ def run(state):
         if state.consume_reset():
             tracker = SpeakerTracker()
             current_frames = []
-            was_speaking = False
+            silence_run = 0
             total_silence_seconds = 0.0
 
         frame_bytes = frame.tobytes()
@@ -41,26 +43,34 @@ def run(state):
 
         if is_speaking:
             current_frames.append(frame)
+            silence_run = 0
+            active = True
 
         else:
-            total_silence_seconds += FRAME_MS / 1000.0
+            silence_run += 1
 
-            if was_speaking and current_frames:
-                utterance = np.concatenate(current_frames)
-                duration_seconds = len(utterance) / SAMPLE_RATE
-                duration_ms = duration_seconds * 1000
+            # Brief pause while an utterance is in progress: hold instead of ending
+            if current_frames and silence_run <= hangover_frames:
+                active = True
 
-                if duration_ms >= MIN_SPEECH_MS:
-                    utterance = utterance.astype(np.float32) / 32768.0
-                    embedding = encoder.encode(utterance, SAMPLE_RATE)
-                    tracker.update(embedding, duration_seconds)
+            else:
+                active = False
+                total_silence_seconds += FRAME_MS / 1000.0
 
-                current_frames = []
+                if current_frames:
+                    utterance = np.concatenate(current_frames)
+                    duration_seconds = len(utterance) / SAMPLE_RATE
+                    duration_ms = duration_seconds * 1000
+
+                    if duration_ms >= MIN_SPEECH_MS:
+                        utterance = utterance.astype(np.float32) / 32768.0
+                        embedding = encoder.encode(utterance, SAMPLE_RATE)
+                        tracker.update(embedding, duration_seconds)
+
+                    current_frames = []
 
         state.update(
-            tracker.current_speaker if is_speaking else None,
+            tracker.current_speaker if active else None,
             tracker.get_state()["times"],
             total_silence_seconds
         )
-
-        was_speaking = is_speaking
