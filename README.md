@@ -6,7 +6,7 @@ speaker has been talking — all running locally with sub-second latency.
 
 ## Demo Video
 
-![hippo](https://github.com/user-attachments/assets/45b5a95d-9ed2-40a5-ab77-9f2942420f73)
+![hippo](https://github.com/user-attachments/assets/9141443b-cc4a-46a2-acaf-5b8cc924689e)
 
 ## How it works
 
