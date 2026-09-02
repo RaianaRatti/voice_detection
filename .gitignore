@@ -1,10 +1,7 @@
 .venv/
 __pycache__/
+.DS_Store
 
 .env
-<<<<<<< HEAD
 preprocessed_features/
 models/
-=======
-models/
->>>>>>> a32cdbc (Docs added)
